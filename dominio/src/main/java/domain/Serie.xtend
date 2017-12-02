@@ -11,6 +11,13 @@ class Serie extends Entity{
 	int temporadas
 	Estado estado = new Pendiente
 	
+	new(){}
+	
+	new (String nombre, int temporadas) {
+		this.nombre =  nombre
+		this.temporadas = temporadas
+	}
+	
 	def mirando() {
 		estado = new Empezada
 	}

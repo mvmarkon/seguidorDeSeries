@@ -14,7 +14,7 @@ class RepoSeries extends CollectionBasedRepo<Serie> {
 	}
 	
 	def search(String name) {
-    	allInstances.filter [serie | (serie.nombre).contains(name) ].toList
+    	allInstances.filter [serie | (serie.nombre.toLowerCase).contains(name.toLowerCase) ].toList
 	}
 	
 	override protected getCriterio(Serie arg0) {
