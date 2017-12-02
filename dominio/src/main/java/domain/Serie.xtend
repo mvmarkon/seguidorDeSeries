@@ -1,9 +1,12 @@
 package domain
 
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.uqbar.commons.model.annotations.TransactionalAndObservable
+import org.uqbar.commons.model.Entity
 
 @Accessors
-class Serie {
+@TransactionalAndObservable
+class Serie extends Entity{
 	String nombre
 	int temporadas
 	Estado estado = new Pendiente
