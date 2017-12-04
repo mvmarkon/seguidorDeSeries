@@ -6,4 +6,15 @@ class Pendiente extends Estado {
 		"Pendiente"
 	}
 	
+	override puedePasarAPendiente() {
+		false
+	}
+	
+	override puedePasarAMirando() {
+		true
+	}
+	
+	override puedePasarAVista() {
+		true
+	}
 }

@@ -6,4 +6,16 @@ class Empezada extends Estado{
 		"Mirando"
 	}
 	
+	override puedePasarAPendiente() {
+		true
+	}
+	
+	override puedePasarAMirando() {
+		false
+	}
+	
+	override puedePasarAVista() {
+		true
+	}
+	
 }
