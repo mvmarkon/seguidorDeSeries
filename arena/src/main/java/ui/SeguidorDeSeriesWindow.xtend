@@ -64,18 +64,29 @@ class SeguidorDeSeriesWindow extends SimpleWindow<ControllerSeguidorSeries>{
 	def segundo(Panel hor) {
 		val ver = new Panel(hor).layout = new VerticalLayout
 		
-		createSerieStatus(ver)
+		createSerieDetails(ver)
 		
 	}
 	
-	def createSerieStatus(Panel panel) {
-		val elementSelected = new NotNullObservable("serieSeleccionada") 
+	def createSerieDetails(Panel panel) {
+		val elementSelected = new NotNullObservable("serieSeleccionada")
+		detailTitulo(panel, elementSelected) 
+		detailTemporadas(panel, elementSelected)
+		detailVistas(panel, elementSelected)
+		detailEstado(panel, elementSelected)
+		createBotoneraEstados(panel, elementSelected)
+	}
+	
+	def detailTitulo(Panel panel, NotNullObservable elementSelected) {
 		new Label(panel) => [ 
 				value <=> "serieSeleccionada.nombre" 
 				fontSize = 18
 				alignCenter
 				bindVisible(elementSelected)
-		]
+		]		
+	}
+	
+	def detailTemporadas(Panel panel, NotNullObservable elementSelected) {
 		new Panel(panel) => [
 			layout = new HorizontalLayout
 			new Label(it) => [ 
@@ -89,6 +100,65 @@ class SeguidorDeSeriesWindow extends SimpleWindow<ControllerSeguidorSeries>{
 				bindVisible(elementSelected)
 			]	
 		]
+	}
+	
+	def detailVistas(Panel panel, NotNullObservable elementSelected) {
+		new Panel(panel) => [
+			layout = new HorizontalLayout
+			new Label(it) => [ 
+				text = "Vistas:  " 
+				fontSize = 13
+				bindVisible(elementSelected)
+			]
+//			new Selector<Integer>(it) => [
+//			     allowNull(false)
+//			     value <=> "serieSeleccionada.tempCompletadas"
+//			     bindItemsToProperty("serieSeleccionada.lista")
+//			     bindVisible(elementSelected)
+//			     onSelection([|modelObject.actualizarSerie ])
+//			]
+
+			customSpinner(it, elementSelected)
+
+			new Label(it) => [
+				text = "  ->  "  
+				fontSize = 13
+				bindVisible(elementSelected)
+			]
+			new Label(it) => [
+				bindValueToProperty("porcentaje")
+				fontSize = 13
+				bindVisible(elementSelected)
+			]	
+		]
+	}
+	
+	def customSpinner(Panel panel, NotNullObservable elem) {
+		new Panel(panel) => [
+			layout = new HorizontalLayout
+			new Button(it) => [
+				height = 30
+				width = 30
+				caption = " - "
+				bindVisible(elem)
+				onClick([|modelObject.lessVisto])
+			]
+			new Label(it) => [
+				fontSize = 13
+				bindVisible(elem)
+				value <=> "serieSeleccionada.tempCompletadas"
+			]
+			new Button(it) => [
+				height = 30
+				width = 30
+				caption = " + "
+				bindVisible(elem)
+				onClick([|modelObject.plusVisto])
+			]
+		]
+	}
+
+	def detailEstado(Panel panel, NotNullObservable elementSelected) {
 		new Panel(panel) => [
 			layout = new HorizontalLayout
 			new Label(it) => [ 
@@ -101,8 +171,7 @@ class SeguidorDeSeriesWindow extends SimpleWindow<ControllerSeguidorSeries>{
 				fontSize = 13
 				bindVisible(elementSelected)
 			]	
-		]
-		createBotoneraEstados(panel, elementSelected)
+		]	
 	}
 	
 	def createBotoneraEstados(Panel panel, NotNullObservable sel) {
@@ -142,13 +211,18 @@ class SeguidorDeSeriesWindow extends SimpleWindow<ControllerSeguidorSeries>{
 	def showSeriesGrid(Table<Serie> table) {
 		new Column<Serie>(table) => [
 			title = "Nombre"
-			fixedSize = 200
+			fixedSize = 150
 			bindContentsToProperty("nombre")
 		]
 		new Column<Serie>(table) => [
 			title = "Temporadas"
 			fixedSize = 90
 			bindContentsToProperty("temporadas")
+		]
+		new Column<Serie>(table) => [
+			title = " % "
+			fixedSize = 50
+			bindContentsToProperty("porcentajeVisto")
 		]
 		new Column<Serie>(table) => [
 			title = "Estado"

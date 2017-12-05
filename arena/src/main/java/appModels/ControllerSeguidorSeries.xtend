@@ -6,6 +6,7 @@ import java.util.List
 import domain.Serie
 import repo.RepoSeries
 import org.uqbar.commons.model.exceptions.UserException
+import org.uqbar.commons.model.utils.ObservableUtils
 
 @Accessors
 @Observable
@@ -17,6 +18,10 @@ class ControllerSeguidorSeries {
 	Serie serieSeleccionada
 	String nombreBusqueda = ""
 
+	def void setSerieSeleccionada(Serie serie) {
+		serieSeleccionada = serie
+		ObservableUtils.firePropertyChanged(this, "porcentaje")
+	}
 
 	def buscarSeries(String nombre) {
 		series = repoInstance.search(nombre);
@@ -33,8 +38,8 @@ class ControllerSeguidorSeries {
 	def reloadSeries() {
 		series = repoInstance.search(nombreBusqueda);
 	}
-	
-	def actualizarSerie() {		
+
+	def actualizarSerie() {
 		repoInstance.update(serieSeleccionada)
 		reloadSeries
 	}
@@ -65,9 +70,45 @@ class ControllerSeguidorSeries {
 			manejarErrorEstado()
 		}
 	}
-	
+
 	def manejarErrorEstado() {
 		throw new UserException("La serie ya se encuentra en estado: "+ serieSeleccionada.estadoSerie)
 	}
 	
+	def plusVisto() {
+		changeVistasBy(1)
+	}
+
+	def lessVisto() {
+		changeVistasBy(-1)
+	}
+	
+	def changeVistasBy(int n) {
+		val nuevo = temporadasCompletas + n
+		if(cantTempValida(nuevo)) {		
+			serieSeleccionada.tempCompletadas = nuevo
+			actualizarSerie
+			ObservableUtils.firePropertyChanged(serieSeleccionada, "tempCompletadas")
+			ObservableUtils.firePropertyChanged(serieSeleccionada, "porcentajeVisto")
+			ObservableUtils.firePropertyChanged(this, "porcentaje")
+		} else {
+			handleViewedError(nuevo)
+		}
+	}
+	
+	def getPorcentaje() {
+		if(serieSeleccionada !== null) serieSeleccionada.porcentajeVisto.toString + " %"
+	}
+	
+	def temporadasCompletas() {
+		serieSeleccionada.tempCompletadas
+	}
+
+	def cantTempValida(int i) {
+		i > -1 && i <= serieSeleccionada.temporadas 
+	}
+	
+	def handleViewedError(int n) {
+		throw new UserException( n + " no es una cantidad validad de temporadas vistas")
+	}	
 }

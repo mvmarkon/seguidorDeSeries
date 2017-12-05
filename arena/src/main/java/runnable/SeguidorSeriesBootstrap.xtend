@@ -24,12 +24,21 @@ class SeguidorSeriesBootstrap extends CollectionBasedBootstrap{
 		val house = new Serie("Dr House", 8)
 		val houseofcards = new Serie("House Of Cards", 5)
 		
+		//Cambio algunos estados
 		got.vista
 		house.vista
 		simpsons.mirando
 		twd.mirando
 		strangerthings.mirando
 		
+		//Cambio  cantidad de temporadas vistas
+		got.tempCompletadas = 7
+		house.tempCompletadas = 8
+		simpsons.tempCompletadas = 17
+		twd.tempCompletadas = 3
+		strangerthings.tempCompletadas = 1
+		
+		//CAargo las series en el repo
 		series => [
 			create(got)
 			create(the100)

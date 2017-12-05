@@ -11,6 +11,7 @@ class Serie extends Entity{
 	String nombre
 	int temporadas
 	Estado estado
+	int tempCompletadas
 	
 	new(){}
 	
@@ -18,8 +19,9 @@ class Serie extends Entity{
 		this.nombre =  nombre
 		this.temporadas = temporadas
 		this.estado = new Pendiente
+		this.tempCompletadas = 0
 	}
-	
+
 	def mirando() {
 		estado = new Empezada
 	}
@@ -48,5 +50,22 @@ class Serie extends Entity{
 	def validarVista() {
 		estado.puedePasarAVista
 	}
-	
+
+//  ESTO LO HABIA PLANTEADO PARA USAR EL SELECTOR 
+//	def List<Integer> lista() {	
+//		var lst = newArrayList()
+//		for (i : 0 ..< (temporadas + 1)) {
+//		    lst.add(i,i)
+//		}
+//		lst
+//	}
+
+	def porcentajeVisto() {
+		(tempCompletadas * 100) / temporadas
+	}
+
+//	def void verificarTemporadas() {
+//		if(tempCompletadas == temporadas && validarVista) vista
+//		if(validarMirando && tempCompletadas != 0 && tempCompletadas <= temporadas) mirando 
+//	}
 }
