@@ -110,13 +110,6 @@ class SeguidorDeSeriesWindow extends SimpleWindow<ControllerSeguidorSeries>{
 				fontSize = 13
 				bindVisible(elementSelected)
 			]
-//			new Selector<Integer>(it) => [
-//			     allowNull(false)
-//			     value <=> "serieSeleccionada.tempCompletadas"
-//			     bindItemsToProperty("serieSeleccionada.lista")
-//			     bindVisible(elementSelected)
-//			     onSelection([|modelObject.actualizarSerie ])
-//			]
 
 			customSpinner(it, elementSelected)
 

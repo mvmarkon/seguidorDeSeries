@@ -7,6 +7,7 @@ import domain.Serie
 import repo.RepoSeries
 import org.uqbar.commons.model.exceptions.UserException
 import org.uqbar.commons.model.utils.ObservableUtils
+import domain.SerieException
 
 @Accessors
 @Observable
@@ -36,7 +37,10 @@ class ControllerSeguidorSeries {
 	}
 	
 	def reloadSeries() {
-		series = repoInstance.search(nombreBusqueda);
+		series = repoInstance.search(nombreBusqueda)
+		ObservableUtils.firePropertyChanged(serieSeleccionada, "tempCompletadas")
+		ObservableUtils.firePropertyChanged(serieSeleccionada, "porcentajeVisto")
+		ObservableUtils.firePropertyChanged(this, "porcentaje")
 	}
 
 	def actualizarSerie() {
@@ -45,57 +49,64 @@ class ControllerSeguidorSeries {
 	}
 
 	def pasarAPendiente() {
-		if(serieSeleccionada.validarPendiente){			
+		try {
 			serieSeleccionada.alFinalNoArranque
+			checkTempsOnPendiente()
 			actualizarSerie
-		} else {
-			manejarErrorEstado()
+		} catch (SerieException err) {
+			manejarErrorEstado(err)
 		}
 	}
 
 	def pasarAMirando() {
-		if(serieSeleccionada.validarMirando){
+		try {
 			serieSeleccionada.mirando
+			checkTempsOnMirando()
 			actualizarSerie
-		} else {
-			manejarErrorEstado()
+		} catch (Exception err) {
+			manejarErrorEstado(err)
 		}
 	}
 
 	def pasarAVista() {
-		if(serieSeleccionada.validarVista){			
+		try {
 			serieSeleccionada.vista
+			checkTempsOnVista()
 			actualizarSerie
-		} else {
-			manejarErrorEstado()
+		} catch (SerieException err) {
+			manejarErrorEstado(err)			
 		}
 	}
 
-	def manejarErrorEstado() {
-		throw new UserException("La serie ya se encuentra en estado: "+ serieSeleccionada.estadoSerie)
+	def manejarErrorEstado(Exception err) {
+		throw new UserException(err.message)
 	}
 	
 	def plusVisto() {
 		changeVistasBy(1)
+		checkEstadoOnPlus
 	}
 
 	def lessVisto() {
 		changeVistasBy(-1)
+		checkEstadoOnLess
 	}
 	
 	def changeVistasBy(int n) {
-		val nuevo = temporadasCompletas + n
-		if(cantTempValida(nuevo)) {		
+		val nuevo = serieSeleccionada.tempCompletadas + n
+		try {
 			serieSeleccionada.tempCompletadas = nuevo
 			actualizarSerie
 			ObservableUtils.firePropertyChanged(serieSeleccionada, "tempCompletadas")
 			ObservableUtils.firePropertyChanged(serieSeleccionada, "porcentajeVisto")
 			ObservableUtils.firePropertyChanged(this, "porcentaje")
-		} else {
-			handleViewedError(nuevo)
+		} catch (SerieException err) {
+			handleViewedError(err)			
 		}
 	}
 	
+	//Pseudo transformer para poder mostrar como porcentaje el nro entero que 
+	//se calcula en el dominio (no me dejaba usar el .transformer en el binding del label)
 	def getPorcentaje() {
 		if(serieSeleccionada !== null) serieSeleccionada.porcentajeVisto.toString + " %"
 	}
@@ -104,11 +115,41 @@ class ControllerSeguidorSeries {
 		serieSeleccionada.tempCompletadas
 	}
 
-	def cantTempValida(int i) {
-		i > -1 && i <= serieSeleccionada.temporadas 
+	def handleViewedError(Exception err) {
+		throw new UserException(err.message)
 	}
 	
-	def handleViewedError(int n) {
-		throw new UserException( n + " no es una cantidad validad de temporadas vistas")
-	}	
+	
+	
+	/*
+	 * Es unPLus pero quizas habria que pensarlo en el dominio(era mas rapido aca) tomarlo como un POC 
+	 * 
+	 */
+	def void checkEstadoOnPlus() {
+		if(serieSeleccionada.porcentajeVisto == 100 && serieSeleccionada.validarVista) {
+			serieSeleccionada.vista
+		} else {
+			if(serieSeleccionada.porcentajeVisto > 0 && serieSeleccionada.porcentajeVisto < 100 && serieSeleccionada.validarMirando) serieSeleccionada.mirando
+		}
+	}
+
+	def void checkEstadoOnLess() {
+		if(serieSeleccionada.porcentajeVisto == 0 && serieSeleccionada.validarPendiente) {
+			serieSeleccionada.alFinalNoArranque
+		} else {
+			if(serieSeleccionada.porcentajeVisto < 100 && serieSeleccionada.validarMirando) serieSeleccionada.mirando			
+		}
+	}
+
+	def void checkTempsOnPendiente() {
+		if(serieSeleccionada.porcentajeVisto > 0) serieSeleccionada.tempCompletadas = 0
+	}
+
+	def void checkTempsOnMirando() {
+		if(serieSeleccionada.porcentajeVisto == 100) serieSeleccionada.tempCompletadas = serieSeleccionada.temporadas - 1
+	}
+
+	def void checkTempsOnVista() {
+		if(serieSeleccionada.porcentajeVisto < 100) serieSeleccionada.tempCompletadas = serieSeleccionada.temporadas
+	}
 }

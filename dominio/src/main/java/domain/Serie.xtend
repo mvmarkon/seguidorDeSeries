@@ -22,16 +22,44 @@ class Serie extends Entity{
 		this.tempCompletadas = 0
 	}
 
+	def void  setTempCompletadas(int n) {
+		if(cantTempValida(n)) {
+			tempCompletadas = n
+		} else {
+			throw new SerieException( n + " no es un nro valido de temporadas vistas");
+		}
+	}
+
+	def cantTempValida(int i) {
+		i > -1 && i <= temporadas 
+	}
+
 	def mirando() {
-		estado = new Empezada
+		if(validarMirando){
+			estado = new Empezada
+		} else {
+			errorEstado
+		}
 	}
 	
 	def vista() {
-		estado = new Terminada
+		if(validarVista) {
+			estado = new Terminada
+		} else {
+			errorEstado
+		}
 	}
 	
 	def alFinalNoArranque() {
-		estado = new Pendiente
+		if(validarPendiente) {
+			estado = new Pendiente
+		} else {
+			errorEstado
+		}
+	}
+
+	def errorEstado() {
+		throw new SerieException("La serie ya se encuentra en estado: "+ estadoSerie)
 	}
 
 	@Dependencies("estado")
@@ -51,21 +79,8 @@ class Serie extends Entity{
 		estado.puedePasarAVista
 	}
 
-//  ESTO LO HABIA PLANTEADO PARA USAR EL SELECTOR 
-//	def List<Integer> lista() {	
-//		var lst = newArrayList()
-//		for (i : 0 ..< (temporadas + 1)) {
-//		    lst.add(i,i)
-//		}
-//		lst
-//	}
-
 	def porcentajeVisto() {
 		(tempCompletadas * 100) / temporadas
 	}
 
-//	def void verificarTemporadas() {
-//		if(tempCompletadas == temporadas && validarVista) vista
-//		if(validarMirando && tempCompletadas != 0 && tempCompletadas <= temporadas) mirando 
-//	}
 }
